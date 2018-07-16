@@ -1,3 +1,4 @@
 gulpfile.js.bk
 npm-debug.log
 .DS_Store
+node_modules/*

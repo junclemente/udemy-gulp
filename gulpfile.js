@@ -1,12 +1,15 @@
 // gulp configuration file
 
 // include gulp and plugins
+// Package descriptions found at www.npmjs.com
 var gulp = require('gulp'),
     newer = require('gulp-newer'), // Onlyp passes through newer source files
     preprocess = require('gulp-preprocess'), // Processes HTML, jScript and other files based on custom or ENV config
     size = require('gulp-size'), // Displays project size
     htmlclean = require('gulp-htmlclean'), // Minifies HTML
     imagemin = require('gulp-imagemin'), // Minimizes/optimizes images
+    sass = require('gulp-sass'), // Sass plugin for Gulp
+    urlAdjuster = require('gulp-css-url-adjuster'), // sass url adjuster
     del = require('del'), // delete files and folders using globs
     pkg = require('./package.json');
 
@@ -32,7 +35,27 @@ var devBuild = ((process.env.NODE_ENV || 'development')
     images = {
         in: source + 'images/*.*',
         out: dest + 'images/'
-    };
+    },
+
+    // define css/sass
+    css = {
+        in: source + 'scss/main.scss',
+        watch: [source + 'scss/**/*'],
+        out: dest + 'css/',
+        sassOpts: {
+            outputStyle: 'nested',  // can be set to 'nested' or 'compressed'
+            imagePath: '../images/',  // sets the path appended to all images used in CSS
+            precision: 3,  // how many decimal places to use when doing calculations
+            errLogToConsole: true
+        }
+    },
+
+    // define fonts
+    fonts = {
+        in: source + 'fonts/*.*',
+        out: css.out + 'fonts/'
+    }
+
 
 // show build type
 console.log(pkg.name + ' ' +
@@ -72,11 +95,35 @@ gulp.task('images', function () {
         .pipe(gulp.dest(images.out));
 });
 
+// manage fonts
+gulp.task('fonts', function() {
+    return gulp.src(fonts.in)
+        .pipe(newer(fonts.out))
+        .pipe(gulp.dest(fonts.out))
+});
+
+// compile sass
+gulp.task('sass', function() {
+    return gulp.src(css.in)
+        .pipe(sass(css.sassOpts))
+        .pipe(urlAdjuster({
+            prepend: css.sassOpts.imagePath
+        }))
+        .pipe(gulp.dest(css.out))
+});
+
 // default task
-gulp.task('default', ['html', 'images'], function() {
+gulp.task('default', ['html', 'images', 'fonts', 'sass'], function() {
+
     // html changes
     gulp.watch(html.watch, ['html']);
 
     // image changes
     gulp.watch(images.in, ['images']);
+
+    // font changes
+    gulp.watch(fonts.in, ['fonts']);
+
+    // sass changes
+    gulp.watch(css.watch, ['sass']);
 });

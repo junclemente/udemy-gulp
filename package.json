@@ -16,8 +16,10 @@
     "gulp": "^3.9.1",
     "gulp-css-url-adjuster": "^0.2.3",
     "gulp-htmlclean": "^2.7.22",
+    "gulp-imacss": "^1.0.0",
     "gulp-imagemin": "^4.1.0",
     "gulp-newer": "^1.4.0",
+    "gulp-pleeease": "^2.0.2",
     "gulp-preprocess": "^3.0.0",
     "gulp-sass": "^4.0.1",
     "gulp-size": "^3.0.0"

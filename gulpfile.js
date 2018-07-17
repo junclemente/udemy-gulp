@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     size = require('gulp-size'), // Displays project size
     htmlclean = require('gulp-htmlclean'), // Minifies HTML
     imagemin = require('gulp-imagemin'), // Minimizes/optimizes images
+    imacss = require('gulp-imacss'), // Converts inline imagesß to dataURI
     sass = require('gulp-sass'), // Sass plugin for Gulp
     urlAdjuster = require('gulp-css-url-adjuster'), // sass url adjuster
     del = require('del'), // delete files and folders using globs
@@ -37,10 +38,18 @@ var devBuild = ((process.env.NODE_ENV || 'development')
         out: dest + 'images/'
     },
 
+    // define imguri location
+    imguri = {
+        in: source + 'images/inline/*',
+        out: source + 'scss/images/',
+        filename: '_datauri.scss',
+        namespace: 'img'
+    }
+
     // define css/sass
     css = {
         in: source + 'scss/main.scss',
-        watch: [source + 'scss/**/*'],
+        watch: [source + 'scss/**/*', '!' + imguri.out + imguri.filename],
         out: dest + 'css/',
         sassOpts: {
             outputStyle: 'nested',  // can be set to 'nested' or 'compressed'
@@ -95,6 +104,14 @@ gulp.task('images', function () {
         .pipe(gulp.dest(images.out));
 });
 
+// convert inline images to dataURIS in SCSS source
+gulp.task('imguri', function() {
+    return gulp.src(imguri.in)
+        .pipe(imagemin())
+        .pipe(imacss(imguri.filename, imguri.namespace))
+        .pipe(gulp.dest(imguri.out));
+})
+
 // manage fonts
 gulp.task('fonts', function() {
     return gulp.src(fonts.in)
@@ -103,7 +120,7 @@ gulp.task('fonts', function() {
 });
 
 // compile sass
-gulp.task('sass', function() {
+gulp.task('sass', ['imguri'], function() {  // add imguri as a dependency to sass task
     return gulp.src(css.in)
         .pipe(sass(css.sassOpts))
         .pipe(urlAdjuster({
@@ -125,5 +142,5 @@ gulp.task('default', ['html', 'images', 'fonts', 'sass'], function() {
     gulp.watch(fonts.in, ['fonts']);
 
     // sass changes
-    gulp.watch(css.watch, ['sass']);
+    gulp.watch([css.watch, imguri.in], ['sass']);
 });

@@ -8,6 +8,9 @@
 @import 'base/_webfonts';
 @import 'base/_forms';
 
+// inline images
+@import 'images/_datauri';
+
 // components
 @import 'components/_header';
 @import 'components/_welcome';

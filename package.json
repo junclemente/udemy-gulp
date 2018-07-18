@@ -1,0 +1,29 @@
+{
+  "name": "mysite",
+  "version": "1.0.0",
+  "description": "My gulp site",
+  "main": "build/index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jun C.",
+  "license": "ISC",
+  "repository": {
+    "type": "test"
+  },
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-css-url-adjuster": "^0.2.3",
+    "gulp-htmlclean": "^2.7.22",
+    "gulp-imacss": "^1.0.0",
+    "gulp-imagemin": "^4.1.0",
+    "gulp-jshint": "^2.1.0",
+    "gulp-newer": "^1.4.0",
+    "gulp-pleeease": "^2.0.2",
+    "gulp-preprocess": "^3.0.0",
+    "gulp-sass": "^4.0.1",
+    "gulp-size": "^3.0.0",
+    "jshint": "^2.9.5"
+  }
+}

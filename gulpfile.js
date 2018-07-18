@@ -10,6 +10,7 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'), // Minimizes/optimizes images
     imacss = require('gulp-imacss'), // Converts inline imagesß to dataURI
     sass = require('gulp-sass'), // Sass plugin for Gulp
+    pleeease = require('gulp-pleeease'), // pluging for pleeease
     urlAdjuster = require('gulp-css-url-adjuster'), // sass url adjuster
     del = require('del'), // delete files and folders using globs
     pkg = require('./package.json');
@@ -44,7 +45,7 @@ var devBuild = ((process.env.NODE_ENV || 'development')
         out: source + 'scss/images/',
         filename: '_datauri.scss',
         namespace: 'img'
-    }
+    },
 
     // define css/sass
     css = {
@@ -56,6 +57,13 @@ var devBuild = ((process.env.NODE_ENV || 'development')
             imagePath: '../images/',  // sets the path appended to all images used in CSS
             precision: 3,  // how many decimal places to use when doing calculations
             errLogToConsole: true
+        },
+        pleeeaseOpts: {
+            autoprefixer: { browsers: ['last 2 versions', '> 2%'] },
+            rem: ['16px'],
+            pseudoElements: true,
+            mqpacker: true,
+            minifier: !devBuild
         }
     },
 
@@ -123,10 +131,13 @@ gulp.task('fonts', function() {
 gulp.task('sass', ['imguri'], function() {  // add imguri as a dependency to sass task
     return gulp.src(css.in)
         .pipe(sass(css.sassOpts))
+        .pipe(size({title: 'CSS in '}))
+        .pipe(pleeease(css.pleeeaseOpts))
+        .pipe(size({title: 'CSS out '}))
         .pipe(urlAdjuster({
             prepend: css.sassOpts.imagePath
         }))
-        .pipe(gulp.dest(css.out))
+        .pipe(gulp.dest(css.out));
 });
 
 // default task

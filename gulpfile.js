@@ -3,17 +3,22 @@
 // include gulp and plugins
 // Package descriptions found at www.npmjs.com
 var gulp = require('gulp'),
-    newer = require('gulp-newer'), // Onlyp passes through newer source files
+    newer = require('gulp-newer'), // Only passes through newer source files
+    concat = require('gulp-concat'),
     preprocess = require('gulp-preprocess'), // Processes HTML, jScript and other files based on custom or ENV config
     size = require('gulp-size'), // Displays project size
     htmlclean = require('gulp-htmlclean'), // Minifies HTML
     imagemin = require('gulp-imagemin'), // Minimizes/optimizes images
-    imacss = require('gulp-imacss'), // Converts inline imagesß to dataURI
+    imacss = require('gulp-imacss'), // Converts inline images to dataURI
     sass = require('gulp-sass'), // Sass plugin for Gulp
     pleeease = require('gulp-pleeease'), // pluging for pleeease
     jshint = require('gulp-jshint'), // Add jshint dependency
+    deporder = require('gulp-deporder'),
+    stripdebug = require('gulp-strip-debug'),
+    uglify = require('gulp-uglify'),
     urlAdjuster = require('gulp-css-url-adjuster'), // sass url adjuster
     del = require('del'), // delete files and folders using globs
+    browsersync = require('browser-sync').create(),
     pkg = require('./package.json');
 
 // file locations
@@ -83,6 +88,16 @@ var devBuild = ((process.env.NODE_ENV || 'development')
     };
 
 
+    // browser-sync
+    syncOpts = {
+        server: {
+            baseDir: dest,
+            index: 'index.html'
+        },
+        open: false,
+        notify: true
+    };
+
 // show build type
 console.log(pkg.name + ' ' +
             pkg.version + ', ' +
@@ -146,24 +161,52 @@ gulp.task('sass', ['imguri'], function() {  // add imguri as a dependency to sas
         .pipe(urlAdjuster({
             prepend: css.sassOpts.imagePath
         }))
-        .pipe(gulp.dest(css.out));
+        .pipe(gulp.dest(css.out))
+        .pipe(browsersync.reload({ stream: true }));
 });
 
 // jshint
 gulp.task('js', function() {
-    return gulp.src(js.in)
-        .pipe(newer(js.out))
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(jshint.reporter('fail'))
-        .pipe(gulp.dest(js.out));
+    if (devBuild) {
+        return gulp.src(js.in)
+            .pipe(newer(js.out))
+            .pipe(jshint())
+            .pipe(jshint.reporter('default'))
+            .pipe(jshint.reporter('fail'))
+            .pipe(gulp.dest(js.out));
+    } else {
+        del([ dest + 'js/*' ]);
+        return gulp.src(js.in)
+            .pipe(deporder())
+            .pipe(concat(js.filename))
+            .pipe(size({ title: 'JS in '}))
+            .pipe(stripdebug())
+            .pipe(uglify())
+            .pipe(size({ title: 'JS out '}))
+            .pipe(gulp.dest(js.out));
+    }
 });
 
+
+// browser sync
+gulp.task('browsersync', function() {
+    browsersync.init(syncOpts);
+});
+// gulp.task('browsersync', function() {
+//     browsersync.init({
+//         server: {
+//             baseDir: dest,
+//             index: "index.html"
+//         }
+//     });
+// });
+
 // default task
-gulp.task('default', ['html', 'images', 'fonts', 'sass', 'js'], function() {
+gulp.task('default', ['html', 'images', 'fonts', 'sass', 'js',
+          'browsersync'], function() {
 
     // html changes
-    gulp.watch(html.watch, ['html']);
+    gulp.watch(html.watch, ['html', browsersync.reload]);
 
     // image changes
     gulp.watch(images.in, ['images']);
@@ -175,6 +218,6 @@ gulp.task('default', ['html', 'images', 'fonts', 'sass', 'js'], function() {
     gulp.watch([css.watch, imguri.in], ['sass']);
 
 
-    gulp.watch(js.in, ['js']);
+    gulp.watch(js.in, ['js', browsersync.reload]);
 
 });

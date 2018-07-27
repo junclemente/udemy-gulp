@@ -1,3 +1,5 @@
+// requires: scrollto.js
+
 // font loader
 var WebFontConfig = {
   google: {

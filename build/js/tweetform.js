@@ -1,3 +1,5 @@
+// requires: scrollto.js fontloader.js
+
 // handles tweet form pop-up
 (function() {
 

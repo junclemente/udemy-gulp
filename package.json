@@ -12,6 +12,7 @@
     "type": "test"
   },
   "devDependencies": {
+    "browser-sync": "^2.24.6",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
@@ -26,6 +27,8 @@
     "gulp-preprocess": "^3.0.0",
     "gulp-sass": "^4.0.1",
     "gulp-size": "^3.0.0",
+    "gulp-strip-debug": "^3.0.0",
+    "gulp-uglify": "^3.0.1",
     "jshint": "^2.9.5"
   }
 }
